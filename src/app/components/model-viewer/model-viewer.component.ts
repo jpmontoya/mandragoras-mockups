@@ -52,7 +52,7 @@ export class ModelViewerComponent implements AfterViewInit {
   public lastImagePrinting: any;
 
   public imageSelected: string = "";
-  public modelSelected: any = "";
+  public modelSelected: any;
 
   public loader: Observable<Boolean>;
 
@@ -353,8 +353,8 @@ export class ModelViewerComponent implements AfterViewInit {
   }
 
 
-  async reloadModel(room3DModel: any, scene: any) {
-    if (this.currentModel) {
+  async reloadModel(deleteModel: boolean, scene: any) {
+    if (this.currentModel && deleteModel) {
       console.log("Removiendo")
       console.log(this.currentModel)
       // this.disposeObject(room3DModel);
@@ -362,7 +362,7 @@ export class ModelViewerComponent implements AfterViewInit {
 
     }
 
-    room3DModel = await this.loadRoomModel(this.modelSelected.modelRoute);
+    let room3DModel = await this.loadRoomModel(this.modelSelected.modelRoute);
     this.currentModel = room3DModel;
 
     const box = new THREE.Box3().setFromObject(room3DModel);
@@ -393,8 +393,8 @@ export class ModelViewerComponent implements AfterViewInit {
               opacity: this.isMagicMug ? 0.5 : 1
             });
 
-          const radius = 41.3;
-          const height = 98.9;
+          const radius = this.modelSelected.dataImage.radius;
+          const height = this.modelSelected.dataImage.height;
 
           const opening = THREE.MathUtils.degToRad(77.4);
           const geometry = new THREE.CylinderGeometry(radius, radius, height, 64, 1, true, THREE.MathUtils.degToRad(129.2), 2 * Math.PI - opening);
@@ -402,7 +402,7 @@ export class ModelViewerComponent implements AfterViewInit {
           const mesh = new THREE.Mesh(geometry, this.mugSublimationPrintingMaterial);
           mesh.name = "sublimation-printing";
           mesh.rotation.y = Math.PI;
-          mesh.position.set(0, (height / 2) + 2.6, 0);
+          mesh.position.set(0, (height / 2) + this.modelSelected.dataImage.positionY, 0);
           resolve(mesh);
         }
       );
@@ -412,7 +412,6 @@ export class ModelViewerComponent implements AfterViewInit {
 
   removeSublimationPrinting(room3DModel: any, mesh: any) {
     if (mesh) {
-      console.log(mesh);
       room3DModel.remove(mesh);
 
       if (mesh.material instanceof THREE.MeshStandardMaterial) {
@@ -467,12 +466,16 @@ export class ModelViewerComponent implements AfterViewInit {
 
     this.imagePrinting.subscribe(async (value: any) => {
       this.imageSelected = value;
-      await this.reloadModel(room3DModel, scene);
+      if (this.modelSelected) {
+        await this.reloadModel(true, scene);
+      }
     });
 
     this.selectedModel.subscribe(async (value: any) => {
       this.modelSelected = value;
-      await this.reloadModel(room3DModel, scene);
+      if (this.modelSelected) {
+        await this.reloadModel(true, scene);
+      }
     });
   }
 }

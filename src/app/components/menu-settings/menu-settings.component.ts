@@ -24,6 +24,8 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { TooltipModule } from 'primeng/tooltip';
 import { SliderModule } from 'primeng/slider';
 import GIF from 'gif.js';
+import { listCategories } from '../../constants/listCategories';
+import { Models3dService } from '../../services/models-3d/models-3d.service';
 
 interface Categories {
   name: string;
@@ -59,8 +61,10 @@ interface Categories {
   standalone: true
 })
 export class MenuSettingsComponent implements OnInit {
-  categories: Categories[] | undefined;
-  selectedCategory: Categories | undefined = { name: 'Mugs', code: 'mugs', disabled: false };
+  public categories: Categories[] = listCategories;
+  selectedCategory: Categories = listCategories[0];
+
+  public selectedCategoryObs: Observable<any>;
 
   public colorPickerBody: Observable<String>;
   public colorPickerRing: Observable<String>;
@@ -76,28 +80,25 @@ export class MenuSettingsComponent implements OnInit {
 
   public loader: Observable<Boolean>;
 
+  public disabledCustom: boolean = true;
+
   constructor(
     private messageService: MessageService,
     private colorsModelsService: ColorsModelsService,
     private imagesPrintingService: ImagesPrintingService,
     private config: PrimeNG,
     private previewService: PreviewService,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private models3dService: Models3dService
   ) {
     this.colorPickerBody = this.colorsModelsService.getColorBody;
     this.colorPickerRing = this.colorsModelsService.getColorRing;
     this.colorPickerHandle = this.colorsModelsService.getColorHandle;
     this.colorPickerInside = this.colorsModelsService.getColorInside;
     this.colorPickerBase = this.colorsModelsService.getColorBase;
+    this.selectedCategoryObs = this.models3dService.getSelectedCategory;
 
     this.loader = this.loaderService.getLoader;
-
-    this.categories = [
-      { name: 'Mugs', code: 'mugs', disabled: false },
-      { name: 'Termos', code: 'RM', disabled: true },
-      { name: 'Camisetas', code: 'tshirts', disabled: true },
-      { name: 'Busos', code: 'coat', disabled: true },
-    ];
 
     this.downloadOptions = [
       {
@@ -110,6 +111,13 @@ export class MenuSettingsComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.models3dService.getSelectedModel.subscribe((value: any) => {
+      this.disabledCustom = value.isCustom;
+    });
+  }
+
+  changeCategory(event: any) {
+    this.models3dService.setSelectedCategory = event.value;
   }
 
   changeColorBody(color: any) {

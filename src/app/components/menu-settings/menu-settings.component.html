@@ -52,10 +52,11 @@
 
             <div>
                 <div class="w-full font-semibold text-left text-gray-700 pl-3">Categorías</div>
-                <p-select id="categories" [options]="categories" [(ngModel)]="selectedCategory" optionLabel="name"
-                    class="w-full" />
+                <p-select id="categories" [options]="categories" [(ngModel)]="selectedCategory"
+                    (onChange)="changeCategory($event)" optionLabel="name" class="w-full" />
             </div>
 
+            @if(disabledCustom){
             <div>
                 <div class="w-full font-semibold text-left text-gray-700 pl-3">Apariencia</div>
                 <div class="flex flex-col gap-3 border-[1px] rounded-[6px] border-[#c7cfdb] p-2 shadow">
@@ -128,6 +129,7 @@
                     </div>
                 </div>
             </div>
+            }
 
             <div class="absolute top-5 right-[105%] whitespace-nowrap">
                 <p-splitbutton label="Descargar mockup" (onClick)="downloadPreview()" [model]="downloadOptions" />
