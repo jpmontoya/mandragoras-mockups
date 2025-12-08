@@ -29,8 +29,8 @@ export const listModels = [
         previweRoute: "preview-lata.png",
         label: "15oz",
         dataImage: {
-            radius: 30.85,
-            height: 88.0,
+            radius: 31.2,
+            height: 91.9,
             positionY: 9.0
         },
         isCustom: false
