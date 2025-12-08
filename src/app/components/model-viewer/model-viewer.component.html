@@ -1,5 +1,30 @@
-<div class="relative flex flex-row items-center justify-center w-full h-full bg-gray-800 overflow-hidden">
-    <div id="container-model" class="w-1/2 h-full">
+<div [ngStyle]="{ backgroundColor: colorPickerBackground }"
+    class="relative flex flex-row items-center justify-center w-full h-full overflow-hidden">
+    <div class="absolute top-0 left-0 h-full w-full bg-cover bg-center z-0"
+        [ngStyle]="{ 'background-image': 'url(' + imagePickerBackground + ')' }">
+    </div>
+
+    <div class="absolute top-5 left-5 bg-white p-2 rounded-md opacity-80 ">
+        <p-colorpicker (onChange)="setBackgroundColor($event)" [ngModel]="colorPickerBackground" inputId="cp-hex" />
+        <span class="ml-3">{{colorPickerBackground}}</span>
+        @if(colorPickerBackground != '#1e2939'){
+        <p-button (click)="resetBackgroundColor()" class="absolute top-[100%] left-0 scale-50 bg-white rounded-full"
+            icon="pi pi-times" size="small" [rounded]="true" severity="danger" [outlined]="true"
+            pTooltip="Resetear color" />
+        }
+        @if(imagePickerBackground){
+        <p-button (click)="imagePickerBackground = undefined"
+            class="absolute top-1/2 transform -translate-y-1/2 left-[100%] bg-white rounded-md ml-2" icon="pi pi-times"
+            pTooltip="Eliminar imagen de fondo" />
+        }@else{
+        <p-button (click)="fileInput.click()"
+            class="absolute top-1/2 transform -translate-y-1/2 left-[100%] bg-white rounded-md ml-2" icon="pi pi-image"
+            pTooltip="Seleccionar imagen de fondo" />
+        }
+        <input type="file" accept="image/*" #fileInput hidden (change)="setBackgroundImage($event)">
+    </div>
+
+    <div id="container-model" class="w-1/2 h-full z-50">
         <div id="container3D" class="w-full h-full"></div>
     </div>
     <div id="preview" class="absolute bottom-0 right-0 w-[20vw] h-[20vw] grid grid-cols-2 bg-[#FFFFFF50]">

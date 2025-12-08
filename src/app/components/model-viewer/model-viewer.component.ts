@@ -13,6 +13,9 @@ import { Models3dService } from '../../services/models-3d/models-3d.service';
 import { ImagesPrintingService } from '../../services/images-printing/images-printing.service';
 import { PreviewService } from '../../services/preview/preview.service';
 import { LoaderService } from '../../services/loader/loader.service';
+import { ColorPickerModule } from 'primeng/colorpicker';
+import { FormsModule } from '@angular/forms';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-model-viewer',
@@ -20,7 +23,10 @@ import { LoaderService } from '../../services/loader/loader.service';
   styleUrl: './model-viewer.component.css',
   imports: [
     CommonModule,
-    ButtonModule
+    ButtonModule,
+    ColorPickerModule,
+    FormsModule,
+    TooltipModule
   ],
   providers: [
     { provide: Window, useValue: window }
@@ -38,6 +44,8 @@ export class ModelViewerComponent implements AfterViewInit {
   private primaryCamera: any;
   private previewCameras: any;
 
+  public imagePickerBackground: any | undefined;
+  public colorPickerBackground: string = "#1e2939";
   public colorPickerBody: Observable<String>;
   public colorPickerRing: Observable<String>;
   public colorPickerHandle: Observable<String>;
@@ -124,6 +132,19 @@ export class ModelViewerComponent implements AfterViewInit {
 
   ngOnInit(): void {
     this.setModelColor();
+  }
+
+  setBackgroundImage(event: any) {
+    const file = event.target.files[0];
+    this.imagePickerBackground = URL.createObjectURL(file);
+  }
+
+  setBackgroundColor(event: any) {
+    this.colorPickerBackground = event.value;
+  }
+
+  resetBackgroundColor() {
+    this.colorPickerBackground = '#1e2939';
   }
 
   ngAfterViewInit(): void {
