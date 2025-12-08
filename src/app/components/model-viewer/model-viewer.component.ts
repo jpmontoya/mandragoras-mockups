@@ -16,6 +16,7 @@ import { LoaderService } from '../../services/loader/loader.service';
 import { ColorPickerModule } from 'primeng/colorpicker';
 import { FormsModule } from '@angular/forms';
 import { TooltipModule } from 'primeng/tooltip';
+import { PrimaryService } from '../../services/primary/primary.service';
 
 @Component({
   selector: 'app-model-viewer',
@@ -110,6 +111,7 @@ export class ModelViewerComponent implements AfterViewInit {
     private models3dService: Models3dService,
     private imagesPrintingService: ImagesPrintingService,
     private previewService: PreviewService,
+    private primaryService: PrimaryService,
     private loaderService: LoaderService
   ) {
     this.colorPickerBody = this.colorsModelsService.getColorBody;
@@ -137,10 +139,17 @@ export class ModelViewerComponent implements AfterViewInit {
   setBackgroundImage(event: any) {
     const file = event.target.files[0];
     this.imagePickerBackground = URL.createObjectURL(file);
+    this.primaryService.setCurrentBackgroundImage = URL.createObjectURL(file);
+  }
+
+  clearBackgroundImage() {
+    this.imagePickerBackground = undefined;
+    this.primaryService.setCurrentBackgroundImage = undefined;
   }
 
   setBackgroundColor(event: any) {
     this.colorPickerBackground = event.value;
+    this.primaryService.setCurrentBackgroundColor = event.value;
   }
 
   resetBackgroundColor() {
@@ -172,7 +181,7 @@ export class ModelViewerComponent implements AfterViewInit {
     this.previewCameras.forEach((cam: any) => cam.lookAt(0, 0, 0));
 
     this.previewService.setPreviewCameras = this.previewCameras;
-    this.previewService.setPrimaryCamera = this.primaryCamera;
+    this.primaryService.setPrimaryCamera = this.primaryCamera;
 
     return {
       scene
@@ -376,9 +385,7 @@ export class ModelViewerComponent implements AfterViewInit {
 
   async reloadModel(deleteModel: boolean, scene: any) {
     if (this.currentModel && deleteModel) {
-      console.log("Removiendo")
-      console.log(this.currentModel)
-      // this.disposeObject(room3DModel);
+      this.disposeObject(this.currentModel);
       scene.remove(this.currentModel);
 
     }
@@ -392,6 +399,7 @@ export class ModelViewerComponent implements AfterViewInit {
 
     scene.add(room3DModel);
     this.previewService.setScene = scene;
+    this.primaryService.setScene = scene;
   }
 
   async createSublimationPrinting(): Promise<any> {

@@ -26,6 +26,7 @@ import { SliderModule } from 'primeng/slider';
 import GIF from 'gif.js';
 import { listCategories } from '../../constants/listCategories';
 import { Models3dService } from '../../services/models-3d/models-3d.service';
+import { PrimaryService } from '../../services/primary/primary.service';
 
 interface Categories {
   name: string;
@@ -88,6 +89,7 @@ export class MenuSettingsComponent implements OnInit {
     private imagesPrintingService: ImagesPrintingService,
     private config: PrimeNG,
     private previewService: PreviewService,
+    private primaryService: PrimaryService,
     private loaderService: LoaderService,
     private models3dService: Models3dService
   ) {
@@ -101,6 +103,12 @@ export class MenuSettingsComponent implements OnInit {
     this.loader = this.loaderService.getLoader;
 
     this.downloadOptions = [
+      {
+        label: 'Descargar muckup',
+        command: () => {
+          this.downloadPreview()
+        }
+      },
       {
         label: 'Descargar video',
         command: () => {
@@ -181,6 +189,100 @@ export class MenuSettingsComponent implements OnInit {
       this.imagesPrintingService.setImage = reader.result as string;
     };
     reader.readAsDataURL(file);
+  }
+
+  async downloadPrimary() {
+    try {
+      const [scene, primaryCamera] = await Promise.all([
+        new Promise<any>((resolve) => this.primaryService.getScene.subscribe(resolve)),
+        new Promise<THREE.Camera>((resolve) => this.primaryService.getPrimaryCamera.subscribe(resolve))
+      ]);
+
+      if (!scene || !primaryCamera) {
+        console.error('Scene or camera not available');
+        return;
+      }
+
+      // Crear renderer
+      const renderer = new THREE.WebGLRenderer({
+        preserveDrawingBuffer: true,
+        antialias: true,
+        alpha: false
+      });
+
+      const size = 400;
+      const quality = 2; // Reducir calidad si hay problemas de performance
+      const zoom = 1.7;
+      renderer.setSize(size * quality, size * quality);
+      renderer.setPixelRatio(quality);
+
+      renderer.setClearColor(0x000000, 0);
+      renderer.clear();
+
+      const finalCanvas = document.createElement('canvas');
+      finalCanvas.width = size * 2 * quality;
+      finalCanvas.height = size * 2 * quality;
+      const ctx = finalCanvas.getContext('2d')!;
+
+      ctx.fillStyle = this.primaryService.currentBackgroundColor;
+      ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+      const renderView = (camera: any) => {
+        return new Promise(resolve => {
+          const x = (finalCanvas.width - size * quality * zoom) / 2;
+          const y = (finalCanvas.height - size * quality * zoom) / 2;
+          // Forzar actualización
+          camera.updateMatrixWorld();
+          scene.updateMatrixWorld();
+
+          camera.aspect = 1;
+          camera.updateProjectionMatrix();
+          // Renderizar
+          renderer.render(scene, camera);
+
+          // Esperar al siguiente frame
+          requestAnimationFrame(() => {
+            ctx.drawImage(
+              renderer.domElement,
+              x, y,
+              size * quality * zoom,
+              size * quality * zoom
+            );
+            resolve(true);
+          });
+        });
+      };
+
+      const downloadCamera = primaryCamera.clone();
+      downloadCamera.matrixWorld.copy(primaryCamera.matrixWorld);
+      downloadCamera.matrixWorldInverse.copy(primaryCamera.matrixWorldInverse);
+
+      const srcImage = this.primaryService.currentBackgroundImage;
+      if (srcImage) {
+        const bgImage = new Image();
+        bgImage.src = srcImage;
+        await bgImage.decode();
+
+        const x = ((bgImage.width) / 2) * -1;
+        const w = (bgImage.width * finalCanvas.height) / bgImage.height
+
+        ctx.drawImage(bgImage, x, 0, w, finalCanvas.height);
+      }
+
+      await renderView(downloadCamera);
+
+      renderer.dispose();
+
+      const link = document.createElement('a');
+      link.href = finalCanvas.toDataURL('image/png');
+      link.download = `primary-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+    } catch (error) {
+      console.error('Error downloading primary:', error);
+    }
   }
 
   async downloadPreview() {
@@ -271,8 +373,8 @@ export class MenuSettingsComponent implements OnInit {
 
     try {
       const [scene, primaryCamera] = await Promise.all([
-        new Promise<any>((resolve) => this.previewService.getScene.subscribe(resolve)),
-        new Promise<any>((resolve) => this.previewService.getPrimaryCamera.subscribe(resolve))
+        new Promise<any>((resolve) => this.primaryService.getScene.subscribe(resolve)),
+        new Promise<any>((resolve) => this.primaryService.getPrimaryCamera.subscribe(resolve))
       ]);
 
       if (!scene || !primaryCamera) return;
