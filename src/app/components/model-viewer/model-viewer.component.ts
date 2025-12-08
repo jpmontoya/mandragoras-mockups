@@ -47,6 +47,7 @@ export class ModelViewerComponent implements AfterViewInit {
   public temperatureMagicMug: Observable<Number>;
 
   public selectedModel: Observable<any>;
+  private currentModel: THREE.Object3D | null = null;
   public imagePrinting: Observable<String>;
   public lastImagePrinting: any;
 
@@ -332,12 +333,37 @@ export class ModelViewerComponent implements AfterViewInit {
 
   }
 
+  disposeObject(object: THREE.Object3D) {
+    object.traverse((node: any) => {
+      if (!node) return;
+      if (node.geometry) {
+        node.geometry.dispose();
+      }
+      if (node.material) {
+        if (Array.isArray(node.material)) {
+          node.material.forEach((m: any) => m.dispose());
+        } else {
+          node.material.dispose();
+        }
+      }
+      if (node.material && node.material.map) {
+        node.material.map.dispose();
+      }
+    });
+  }
+
+
   async reloadModel(room3DModel: any, scene: any) {
-    if (room3DModel) {
-      scene.remove(room3DModel);
+    if (this.currentModel) {
+      console.log("Removiendo")
+      console.log(this.currentModel)
+      // this.disposeObject(room3DModel);
+      scene.remove(this.currentModel);
+
     }
 
     room3DModel = await this.loadRoomModel(this.modelSelected.modelRoute);
+    this.currentModel = room3DModel;
 
     const box = new THREE.Box3().setFromObject(room3DModel);
     const center = new THREE.Vector3(0, (box.min.y + box.max.y) / 2, 0);
@@ -441,12 +467,12 @@ export class ModelViewerComponent implements AfterViewInit {
 
     this.imagePrinting.subscribe(async (value: any) => {
       this.imageSelected = value;
-      this.reloadModel(room3DModel, scene);
+      await this.reloadModel(room3DModel, scene);
     });
 
     this.selectedModel.subscribe(async (value: any) => {
       this.modelSelected = value;
-      this.reloadModel(room3DModel, scene);
+      await this.reloadModel(room3DModel, scene);
     });
   }
 }

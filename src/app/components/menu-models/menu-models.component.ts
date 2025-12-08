@@ -28,10 +28,19 @@ export class MenuModelsComponent {
 
   listModels = [
     {
+      typeModel: "mug",
       modelRoute: "Mug_11oz.glb",
-      previweRoute: "preview-mug.png"
+      previweRoute: "preview-mug_11oz.png",
+      label: "11oz"
     },
+    {
+      typeModel: "mug",
+      modelRoute: "Mug_6oz.glb",
+      previweRoute: "preview-mug_6oz.png",
+      label: "6oz"
+    }
     // {
+    //   typeModel: "lata",
     //   modelRoute: "SodaCan_15oz.glb",
     //   previweRoute: "preview-lata.png"
     // }

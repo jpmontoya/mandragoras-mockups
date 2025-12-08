@@ -9,11 +9,12 @@ interface model3D {
 @Injectable({
   providedIn: 'root'
 })
+
 export class Models3dService {
   private selectedModel: BehaviorSubject<model3D> = new BehaviorSubject<model3D>(
     {
       modelRoute: "Mug_11oz.glb",
-      previweRoute: "preview-mug.png"
+      previweRoute: "preview-mug_11oz.png"
     }
   );
 

@@ -4,7 +4,7 @@
         <div (click)="changeModel(item)"
             [class]="'relative h-full w-36 rounded overflow-hidden shadow hover:bg-gray-800 cursor-pointer ' + ((selectedModel | async)?.previweRoute === item.previweRoute ? 'bg-gray-800' : 'bg-white')">
             <p-image class="h-full" [src]="'models-preview/' + item.previweRoute" alt="Preview" />
-            <span class="absolute bottom-0 right-3 text-gray-500 font-semibold">11oz</span>
+            <span class="absolute bottom-0 right-3 text-gray-500 font-semibold">{{item.label}}</span>
         </div>
         }
     </div>
