@@ -4,6 +4,6 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 ## Development in Github
 
-1. ng build --configuration production --base-href "https://jpmontoya.github.io/mockups-mandragoras/"
+1. ng build --configuration production --base-href "https://jpmontoya.github.io/mandragoras-mockups/"
 2. npx angular-cli-ghpages --dir=dist/mockups-mandragoras/browser
 
